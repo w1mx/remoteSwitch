@@ -16,6 +16,7 @@ import (
 	rb "github.com/dh1tw/remoteSwitch/switch/ea4tx_remotebox"
 	mpGPIO "github.com/dh1tw/remoteSwitch/switch/multi-purpose-switch-gpio"
 	smGPIO "github.com/dh1tw/remoteSwitch/switch/stackmatch_gpio"
+	"github.com/dh1tw/remoteSwitch/switch/w1mx"
 	"github.com/gogo/protobuf/proto"
 	micro "github.com/micro/go-micro"
 	"github.com/micro/go-micro/broker"
@@ -89,6 +90,16 @@ func natsServer(cmd *cobra.Command, args []string) {
 	switchName := viper.GetString("switch.name")
 
 	switch switchType {
+	case "w1mx":
+		sc, err := configparser.GetW1MXSwitchConfig(switchName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		sw := w1mx.NewSwitch(sc, rpcSwitch.PublishDeviceUpdate)
+		if err := sw.Init(); err != nil {
+			log.Fatal(err)
+		}
+		rpcSwitch.sw = sw
 	case "multi_purpose_gpio":
 		sc, err := configparser.GetMPGPIOSwitchConfig(switchName)
 		if err != nil {
